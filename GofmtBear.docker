@@ -1,0 +1,5 @@
+# GofmtBear
+RUN \
+  $zypper_install \
+    go1.8 && \
+  cp /all-bears/bears/go/GofmtBear.py /bears/bears/go/GofmtBear.py

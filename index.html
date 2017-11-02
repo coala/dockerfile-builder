@@ -1,0 +1,147 @@
+<html>
+<head>
+  <title>Build your coala Dockerfile</title>
+  <link rel="stylesheet" href="spectre.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</head>
+
+<script>
+var bears = {
+  "PEP8Bear": {
+    "file": "/PEP8Bear.docker",
+    "toggle": false,
+  },
+  "PHPCodeSnifferBear": {
+    "file": "/PHPCodeSnifferBear.docker",
+    "toggle": false,
+  },
+  "GhcModBear": {
+    "file": "/GhcModBear.docker",
+    "toggle": false,
+  },
+  "GofmtBear": {
+    "file": "/GofmtBear.docker",
+    "toggle": false,
+  },
+}
+
+var dockerfilePrefix = "";
+var dockerfileSuffix = "";
+
+function newLangaugeCheckbox(bear, toggle) {
+  var label = $("<label class=\"form-switch\"></label>");
+
+  var input = "<input type=\"checkbox\"";
+  input += " onchange=\"toggleBear('" + bear + "')\"";
+  if (toggle)
+    input += " checked";
+  input += ">";
+  label.append($(input));
+
+  var i = "<i class=\"form-icon\"></i>";
+  label.append($(i));
+
+  var text = bear;
+  label.append(text);
+
+  return label;
+}
+
+function populateBears() {
+  for (var bear in bears) {
+    var toggle = bears[bear].toggle;
+    $("#langs").append(newLangaugeCheckbox(bear, toggle));
+  }
+}
+
+function getDockerfiles(callback) {
+  $.get("/prefix.docker", function(prefix) {
+    dockerfilePrefix = prefix;
+    $.get("/suffix.docker", function(suffix) {
+      dockerfileSuffix = suffix;
+      var completedBears = 0;
+      var totalBears = Object.keys(bears).length;
+      Object.keys(bears).forEach(function(bear) {
+        $.get(bears[bear].file, function(contents) {
+          bears[bear].contents = contents;
+          completedBears += 1;
+          if (completedBears == totalBears)
+            callback();
+        });
+      });
+    });
+  });
+}
+
+function buildDockerfile() {
+  var dockerfile = dockerfilePrefix;
+
+  for (var bear in bears) {
+    var toggle = bears[bear].toggle;
+    if (!toggle)
+      continue;
+
+    dockerfile += "\n\n";
+    dockerfile += bears[bear].contents;
+  }
+
+  dockerfile += "\n\n";
+  dockerfile += dockerfileSuffix;
+
+  $("#dockerfile").text(dockerfile);
+}
+
+function toggleBear(bear) {
+  bears[bear].toggle = !bears[bear].toggle;
+
+  buildDockerfile();
+}
+
+window.onload = function() {
+  populateBears();
+  getDockerfiles(function() {
+    buildDockerfile();
+  });
+}
+</script>
+
+<style>
+.langs {
+  left: 0px;
+  top: 0px;
+  position: fixed;
+  overflow-y: scroll;
+  width: 360px;
+  height: 100%;
+  padding: 32px;
+}
+
+.form-switch {
+  display: block;
+}
+
+.dockerfile {
+  position: fixed;
+  left: 360px;
+  width: calc(100% - 360px);
+  height: 100%;
+  overflow-y: scroll;
+  padding: 32px;
+  background: #fdf4f4;
+}
+
+code {
+  white-space: pre-line;
+  margin: 0px;
+  padding: 0px;
+}
+</style>
+
+<body>
+  <div id="langs" class="langs">
+  </div>
+  <div class="dockerfile">
+    <code><pre id="dockerfile"></pre></code>
+  </div>
+</body>
+</html>

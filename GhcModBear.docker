@@ -1,0 +1,11 @@
+# GhcModBear
+RUN \
+  zypper addrepo http://download.opensuse.org/repositories/devel:/languages:/haskell/openSUSE_Tumbleweed/devel:languages:haskell.repo && \
+  $zypper_install \
+    ghc \
+    cabal-install && \
+  cabal update && \
+  cabal install happy && \
+  cabal install ghc-mod && \
+  ln -s $HOME/.cabal/bin/ghc-mod /usr/bin/ghc-mod && \
+  cp /all-bears/bears/haskell/GhcModBear.py /bears/bears/haskell/GhcModBear.py

@@ -1,0 +1,39 @@
+FROM opensuse:tumbleweed
+
+ARG clone='git clone --depth 1'
+ARG zypper_install='zypper -vv --no-gpg-checks --non-interactive \
+                    install --replacefiles --download-in-advance'
+ARG pip3_install='pip3 install --no-cache-dir'
+
+ENV LANG=en_US.UTF-8 LANGUAGE=en_US:en
+
+RUN \
+  zypper removerepo 'NON-OSS' && \
+  $zypper_install \
+    git \
+    python3 \
+    python3-pip \
+    glibc-locale
+
+RUN \
+  # Clone and install coala master.
+  $clone https://github.com/coala/coala.git /coala && \
+  $pip3_install -e /coala && \
+  # Clone coala-bears master, but don't install it.
+  $clone https://github.com/coala/coala-bears.git /all-bears
+
+RUN \
+  # Create the skeletal directory structure.
+  for bear in $(find /all-bears -name "*Bear.py"); do \
+    bear_directory="$(dirname $bear)"; \
+    relative_path="${bear_directory#/all-bears/}"; \
+    mkdir -p "/bears/${relative_path}"; \
+  done && \
+  # Copy miscellaneous files as well.
+  find /all-bears/bears -name "*" -maxdepth 1 -type f -exec cp {} /bears/bears/ \; && \
+  cp /all-bears/test-requirements.txt /bears/ && \
+  cp /all-bears/docs-requirements.txt /bears/ && \
+  cp /all-bears/requirements.txt /bears/ && \
+  cp /all-bears/ignore.txt /bears/ && \
+  cp /all-bears/README.rst /bears/ && \
+  cp /all-bears/setup.py /bears/

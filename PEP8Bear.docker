@@ -1,0 +1,4 @@
+# PEP8Bear
+RUN \
+  grep autopep /all-bears/bear-requirements.txt >> /bears/bear-requirements.txt && \
+  cp /all-bears/bears/python/PEP8Bear.py /bears/bears/python/PEP8Bear.py

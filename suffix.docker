@@ -1,0 +1,20 @@
+RUN \
+  # Install just the require bears.
+  $pip3_install -e /bears && \
+  # Remove temporary directories.
+  rm -vrf /all-bears
+
+RUN \
+  # Remove unused dependencies.
+  zypper -vv --non-interactive remove --clean-deps \
+    git && \
+  zypper clean -a && \
+  # Remove unused directories
+  rm -vrf \
+    /tmp/* \
+    /var/cache/ \
+    /var/lib/rpm \
+    /var/log/
+
+ADD docker-coala.sh /usr/local/bin/
+CMD ["/usr/local/bin/docker-coala.sh"]

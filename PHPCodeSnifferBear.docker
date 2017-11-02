@@ -1,0 +1,10 @@
+# PHPCodeSnifferBear
+RUN \
+  $zypper_install \
+    php7 \
+    php7-pear \
+    php7-pear-Archive_Tar \
+    php7-tokenizer \
+    php7-xmlwriter && \
+  pear install PHP_CodeSniffer && \
+  cp /all-bears/bears/php/PHPCodeSnifferBear.py /bears/bears/php/PHPCodeSnifferBear.py
